@@ -4,20 +4,26 @@
 points for regression
 in form [x,y]
 """
-data = [[3, 5], [4, 8],[-2,6],[1,2]]
+data = [[3, 5], [4, 8], [-2,6], [1,2]]
 
 """
 2 = linear
 3 = quadratic
 4 = cubic
 """
-power = 3
+power = 4
+
+"""
+how many decimal points of accuracy you want
+higher numbers may lead to longer run times
+"""
+dec = 5
 
 """
 choose lower number for more accurate regressions, but slower run times
 choose higher number for less accurate regressions, but faster run times
 """
-a = 0.01
+a = 0.001
 
 """
 chooses regression with highest r^2 value
@@ -86,7 +92,7 @@ def res(theta, data):
 while fit != power:
     fit = 0
     for i in range(power):
-        if theta[i] == oldTheta[i]:
+        if round(theta[i],dec) == round(oldTheta[i],dec):
             fit += 1
         oldTheta[i] = theta[i]
         tempTheta[i] = grad(theta, i, data)
@@ -97,7 +103,7 @@ while fit != power:
 print("y = ", end="")
 for i in range(power):
     if i + 1 != power:
-        print(str(theta[i]) + " x^" + str(i) + " + ", end="")
+        print(str(round(theta[i], dec)) + " x^" + str(i) + " + ", end="")
     else:
-        print(str(theta[i]) + " x^" + str(i))
+        print(str(round(theta[i], dec)) + " x^" + str(i))
 print("r^2 = " + str(res(theta, data)))
