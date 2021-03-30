@@ -4,7 +4,7 @@
 points for regression
 in form [x,y]
 """
-data = [[3, 5], [4, 8],[-2,6]]
+data = [[3, 5], [4, 8],[-2,6],[1,2]]
 
 """
 2 = linear
@@ -65,6 +65,23 @@ def grad(theta, z, data):
         n += (hypL(theta, data[i][0]) - data[i][1]) * data[i][0] ** z
     return theta[z] - a / m * n
 
+def res(theta, data):
+    predict = []
+    mean = 0
+    RSS = 0
+    TSS = 0
+    for i in data:
+        temp = 0
+        for z in range(len(theta)):
+            temp += theta[z] * i[0] ** z
+        predict.append(temp)
+    for i in range(len(predict)):
+        mean += predict[i]
+    mean /= len(predict)
+    for i in range(len(data)):
+        RSS += (data[i][1] - predict[i])**2
+        TSS += (data[i][1] - mean)**2
+    return 1-RSS/TSS
 
 while fit != power:
     fit = 0
@@ -82,4 +99,5 @@ for i in range(power):
     if i + 1 != power:
         print(str(theta[i]) + " x^" + str(i) + " + ", end="")
     else:
-        print(str(theta[i]) + " x^" + str(i), end="")
+        print(str(theta[i]) + " x^" + str(i))
+print("r^2 = " + str(res(theta, data)))
