@@ -1,10 +1,13 @@
+from manimlib import *
+import numpy as np
+
 # CHANGE THESE #
 
 """
 points for regression
 in form [x,y]
 """
-data = [[0, 0], [1, 1], [2, 2], [3, 3]]
+data = [[-2, 2], [0, -2], [2, -1], [5, 2], [4, 3]]
 
 """
 2 = linear
@@ -17,7 +20,7 @@ power = 2
 how many decimal points of accuracy you want
 higher numbers may lead to longer run times
 """
-dec = 5
+dec = 6
 
 """
 choose lower number for more accurate regressions, but slower run times
@@ -141,15 +144,16 @@ if smart == True:
     print("r^2 = " + str(res(theta, data)))
 
 else:
-    while fit != power:
-        fit = 0
-        for i in range(power):
-            if round(theta[i], dec) == round(oldTheta[i], dec):
-                fit += 1
-            oldTheta[i] = theta[i]
-            tempTheta[i] = grad(theta, i, data)
-        for i in range(power):
-            theta[i] = tempTheta[i]
+    # while fit != power:
+    #     fit = 0
+    #     for i in range(power):
+    #         if round(theta[i], dec) == round(oldTheta[i], dec):
+    #             fit += 1
+    #         oldTheta[i] = theta[i]
+    #         # print(theta[i])
+    #         tempTheta[i] = grad(theta, i, data)
+    #     for i in range(power):
+    #         theta[i] = tempTheta[i]
 
     # printing
     print("y = ", end="")
@@ -159,3 +163,102 @@ else:
         else:
             print(str(round(theta[i], dec)) + " x^" + str(i))
     print("r^2 = " + str(res(theta, data)))
+
+
+class animate(Scene):
+    def construct(self):
+        axes = Axes(
+            # x-axis ranges from -1 to 10, with a default step size of 1
+            x_range=(-6, 6, 1),
+            # y-axis ranges from -2 to 10 with a step size of 0.5
+            y_range=(-3, 3, 1),
+            # The axes will be stretched so as to match the specified
+            # height and width
+            height=6,
+            width=12,
+            # Axes is made of two NumberLine mobjects.  You can specify
+            # their configuration with axis_config
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "include_tip": False,
+            },
+            # Alternatively, you can specify configuration for just one
+            # of them, like this.
+        )
+        axes.add_coordinate_labels()
+
+        self.play(Write(axes, lag_ratio=0.01, run_time=1))
+
+        # self.play(
+        #     ShowCreation(sin_graph),
+        #     FadeIn(sin_label, RIGHT),
+        # )
+        # self.wait(2)
+        # self.play(
+        #     ReplacementTransform(sin_graph, relu_graph),
+        #     FadeTransform(sin_label, relu_label),
+        # )
+
+        # You can use axes.input_to_graph_point, abbreviated
+        # to axes.i2gp, to find a particular point on a graph
+        for i in range(len(data)):
+            dot = Dot(color=RED)
+            dot.move_to([data[i][0], data[i][1], 0])
+            self.play(FadeIn(dot, scale=0.5))
+        linear_graph1 = axes.get_graph(
+            lambda x: 0,
+            # use_smoothing=False,
+            color=YELLOW,
+        )
+        linear_graph2 = axes.get_graph(
+            lambda x: 0,
+            # use_smoothing=False,
+            color=YELLOW,
+        )
+        fit = 0
+        last = 0
+        num = 0
+        rand = False
+        iters = 1000
+        while fit != power:
+            fit = 0
+            for i in range(power):
+                if round(theta[i], dec) == round(oldTheta[i], dec):
+                    fit += 1
+                oldTheta[i] = theta[i]
+                # print(theta[i])
+                tempTheta[i] = grad(theta, i, data)
+            for i in range(power):
+                theta[i] = tempTheta[i]
+            num += 1
+            if round(num/iters) > last:
+                if not rand:
+                    linear_graph1 = axes.get_graph(
+                        lambda x: theta[0] + theta[1] * x + theta[2],
+                        # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2,
+                        # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2 + theta[3] * x ** 3,
+                        # use_smoothing=False,
+                        color=YELLOW,
+                    )
+                    self.play(
+                        ReplacementTransform(linear_graph2, linear_graph1),
+                    )
+                    rand = True
+                    last = round(num / iters)
+                else:
+                    linear_graph2 = axes.get_graph(
+                        lambda x: theta[0] + theta[1] * x + theta[2],
+                        # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2,
+                        # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2 + theta[3] * x ** 3,
+                        # use_smoothing=False,
+                        color=YELLOW,
+                    )
+                    self.play(
+                        ReplacementTransform(linear_graph1, linear_graph2),
+                    )
+                    rand = False
+                    last = round(num / iters)
+
+
+        self.wait(5)
