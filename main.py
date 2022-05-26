@@ -7,14 +7,14 @@ import numpy as np
 points for regression
 in form [x,y]
 """
-data = [[-2, 2], [0, -2], [2, -1], [5, 2], [4, 3]]
+data = [[-1, -1], [0, 0], [1, 2], [-3, -6], [2, 7]]
 
 """
 2 = linear
 3 = quadratic
 4 = cubic
 """
-power = 2
+power = 4
 
 """
 how many decimal points of accuracy you want
@@ -98,7 +98,7 @@ def res(theta, data):
     return 1 - RSS / TSS
 
 
-if smart == True:
+if smart:
     fTheta.append([0, 0, 0])
     fTheta.append([0, 0, 0, 0])
     fTheta.append([0, 0, 0, 0, 0])
@@ -166,16 +166,22 @@ else:
 
 
 class animate(Scene):
+    yR = 8
+    xR = 12
+    h = 7
+    w = 13
+    size = 20
+    iters = 500
     def construct(self):
         axes = Axes(
             # x-axis ranges from -1 to 10, with a default step size of 1
-            x_range=(-6, 6, 1),
+            x_range=(-self.xR, self.xR, 1),
             # y-axis ranges from -2 to 10 with a step size of 0.5
-            y_range=(-3, 3, 1),
+            y_range=(-self.yR, self.yR, 1),
             # The axes will be stretched so as to match the specified
             # height and width
-            height=6,
-            width=12,
+            height=self.h,
+            width=self.w,
             # Axes is made of two NumberLine mobjects.  You can specify
             # their configuration with axis_config
             axis_config={
@@ -190,21 +196,14 @@ class animate(Scene):
 
         self.play(Write(axes, lag_ratio=0.01, run_time=1))
 
-        # self.play(
-        #     ShowCreation(sin_graph),
-        #     FadeIn(sin_label, RIGHT),
-        # )
-        # self.wait(2)
-        # self.play(
-        #     ReplacementTransform(sin_graph, relu_graph),
-        #     FadeTransform(sin_label, relu_label),
-        # )
+        textAnimate1 = Tex("y = 0\\\\r^2 = 0", font_size=self.size)
+        self.play(Write(textAnimate1.to_edge(TOP).to_edge(LEFT)))
 
         # You can use axes.input_to_graph_point, abbreviated
         # to axes.i2gp, to find a particular point on a graph
         for i in range(len(data)):
             dot = Dot(color=RED)
-            dot.move_to([data[i][0], data[i][1], 0])
+            dot.move_to([data[i][0] * self.w / (self.xR * 2), data[i][1] * self.h / (self.yR * 2), 0])
             self.play(FadeIn(dot, scale=0.5))
         linear_graph1 = axes.get_graph(
             lambda x: 0,
@@ -220,7 +219,6 @@ class animate(Scene):
         last = 0
         num = 0
         rand = False
-        iters = 1000
         while fit != power:
             fit = 0
             for i in range(power):
@@ -231,13 +229,14 @@ class animate(Scene):
                 tempTheta[i] = grad(theta, i, data)
             for i in range(power):
                 theta[i] = tempTheta[i]
+
             num += 1
-            if round(num/iters) > last:
+            if round(num / self.iters) > last:
                 if not rand:
                     linear_graph1 = axes.get_graph(
-                        lambda x: theta[0] + theta[1] * x + theta[2],
+                        # lambda x: theta[0] + theta[1] * x,
                         # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2,
-                        # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2 + theta[3] * x ** 3,
+                        lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2 + theta[3] * x ** 3,
                         # use_smoothing=False,
                         color=YELLOW,
                     )
@@ -245,12 +244,12 @@ class animate(Scene):
                         ReplacementTransform(linear_graph2, linear_graph1),
                     )
                     rand = True
-                    last = round(num / iters)
+                    last = round(num / self.iters)
                 else:
                     linear_graph2 = axes.get_graph(
-                        lambda x: theta[0] + theta[1] * x + theta[2],
+                        # lambda x: theta[0] + theta[1] * x,
                         # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2,
-                        # lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2 + theta[3] * x ** 3,
+                        lambda x: theta[0] + theta[1] * x + theta[2] * x ** 2 + theta[3] * x ** 3,
                         # use_smoothing=False,
                         color=YELLOW,
                     )
@@ -258,7 +257,15 @@ class animate(Scene):
                         ReplacementTransform(linear_graph1, linear_graph2),
                     )
                     rand = False
-                    last = round(num / iters)
-
-
-        self.wait(5)
+                    last = round(num / self.iters)
+                # text code
+                text = "y = "
+                for i in range(power):
+                    if i + 1 != power:
+                        text += (str(round(theta[i], dec)) + " x^" + str(i) + " + ")
+                    else:
+                        text += (str(round(theta[i], dec)) + " x^" + str(i))
+                text += ("\\\\r^2 = " + str(res(theta, data)))
+                textAnimate2 = Tex(text, font_size=self.size).to_edge(TOP).to_edge(LEFT)
+                self.play(FadeTransform(textAnimate1, textAnimate2))
+                textAnimate1 = textAnimate2
