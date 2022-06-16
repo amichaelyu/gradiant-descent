@@ -98,80 +98,14 @@ def res(theta, data):
     return 1 - RSS / TSS
 
 
-if smart:
-    fTheta.append([0, 0, 0])
-    fTheta.append([0, 0, 0, 0])
-    fTheta.append([0, 0, 0, 0, 0])
-    for power in range(2, 5):
-        for i in range(power):
-            theta.append(0)
-            tempTheta.append(0)
-            oldTheta.append(1)
-        while fit != power:
-            fit = 0
-            for i in range(power):
-                if round(theta[i], dec) == round(oldTheta[i], dec):
-                    fit += 1
-                oldTheta[i] = theta[i]
-                tempTheta[i] = grad(theta, i, data)
-            for i in range(power):
-                theta[i] = tempTheta[i]
-        fTheta[power - 2][0] = res(theta, data)
-        for i in range(power):
-            fTheta[power - 2][i + 1] = theta[i]
-        theta = theta[:-power]
-        tempTheta = tempTheta[:-power]
-        oldTheta = oldTheta[:-power]
-    if fTheta[0][0] >= fTheta[1][0]:
-        if fTheta[0][0] >= fTheta[2][0]:
-            for i in range(2):
-                theta.append(fTheta[0][i + 1])
-                num = 2
-        else:
-            for i in range(4):
-                theta.append(fTheta[2][i + 1])
-                num = 3
-    else:
-        for i in range(3):
-            theta.append(fTheta[1][i + 1])
-            num = 4
-    print("y = ", end="")
-    for i in range(num):
-        if i + 1 != num:
-            print(str(round(theta[i], dec)) + " x^" + str(i) + " + ", end="")
-        else:
-            print(str(round(theta[i], dec)) + " x^" + str(i))
-    print("r^2 = " + str(res(theta, data)))
-
-else:
-    # while fit != power:
-    #     fit = 0
-    #     for i in range(power):
-    #         if round(theta[i], dec) == round(oldTheta[i], dec):
-    #             fit += 1
-    #         oldTheta[i] = theta[i]
-    #         # print(theta[i])
-    #         tempTheta[i] = grad(theta, i, data)
-    #     for i in range(power):
-    #         theta[i] = tempTheta[i]
-
-    # printing
-    print("y = ", end="")
-    for i in range(power):
-        if i + 1 != power:
-            print(str(round(theta[i], dec)) + " x^" + str(i) + " + ", end="")
-        else:
-            print(str(round(theta[i], dec)) + " x^" + str(i))
-    print("r^2 = " + str(res(theta, data)))
-
-
-class animate(Scene):
+class Animate(Scene):
     yR = 8
     xR = 12
     h = 7
     w = 13
     size = 20
     iters = 500
+
     def construct(self):
         axes = Axes(
             # x-axis ranges from -1 to 10, with a default step size of 1
@@ -269,3 +203,56 @@ class animate(Scene):
                 textAnimate2 = Tex(text, font_size=self.size).to_edge(TOP).to_edge(LEFT)
                 self.play(FadeTransform(textAnimate1, textAnimate2))
                 textAnimate1 = textAnimate2
+
+
+class Graph(Scene):
+    yR = 15
+    xR = 13
+    h = 7
+    w = 13
+    size = 20
+    iters = 500
+
+    def construct(self):
+        axes = Axes(
+            # x-axis ranges from -1 to 10, with a default step size of 1
+            x_range=(-self.xR, self.xR, 1),
+            # y-axis ranges from -2 to 10 with a step size of 0.5
+            y_range=(-self.yR, self.yR, 1),
+            # The axes will be stretched so as to match the specified
+            # height and width
+            height=self.h,
+            width=self.w,
+            # Axes is made of two NumberLine mobjects.  You can specify
+            # their configuration with axis_config
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "include_tip": False,
+            },
+            # Alternatively, you can specify configuration for just one
+            # of them, like this.
+        )
+
+        # You can use axes.input_to_graph_point, abbreviated
+        # to axes.i2gp, to find a particular point on a graph
+        func = lambda \
+            x: -960389 / 554268 + -28053989 / 7054320 * x + 634631 / 4594590 * x ** 2 + 9846547 / 26604864 * x ** 3 + -10202077 / 558702144 * x ** 4 + -5308757 / 931170240 * x ** 5 + 159751 / 399072960 * x ** 6
+        graph1 = axes.get_graph(
+            func,
+            # use_smoothing=False,
+            color=YELLOW,
+        )
+        self.play(ShowCreation(graph1))
+        dot = Dot(color=RED)
+        dot.move_to([-1 * self.w / (self.xR * 2), func(-1) * self.h / (self.yR * 2), 0])
+        path = axes.get_graph(func, x_range=[-1, 1.983])
+        path2 = axes.get_graph(func, x_range=[-4, -5.665])
+        path2.reverse_points()
+        self.play(FadeIn(dot, scale=0.5))
+        self.wait()
+        self.play(MoveAlongPath(dot, path), run_time=1)
+        self.wait(2)
+        dot.move_to([-4 * self.w / (self.xR * 2), func(-4) * self.h / (self.yR * 2), 0])
+        self.wait()
+        self.play(MoveAlongPath(dot, path2), run_time=1)
