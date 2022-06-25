@@ -2,6 +2,7 @@ from manimlib import *
 import numpy as np
 
 # CHANGE THESE #
+from manimlib.scene.vector_space_scene import VectorScene
 
 """
 points for regression
@@ -98,7 +99,7 @@ def res(theta, data):
     return 1 - RSS / TSS
 
 
-class Animate(Scene):
+class Decent(Scene):
     yR = 8
     xR = 12
     h = 7
@@ -233,26 +234,124 @@ class Graph(Scene):
             # Alternatively, you can specify configuration for just one
             # of them, like this.
         )
+        axes2 = Axes(
+            # x-axis ranges from -1 to 10, with a default step size of 1
+            x_range=(-3, 2, 1),
+            # y-axis ranges from -2 to 10 with a step size of 0.5
+            y_range=(-2, 4, 1),
+            # The axes will be stretched so as to match the specified
+            # height and width
+            height=self.h,
+            width=self.w,
+            # Axes is made of two NumberLine mobjects.  You can specify
+            # their configuration with axis_config
+            axis_config={
+                "stroke_color": GREY_A,
+                "stroke_width": 2,
+                "include_tip": False,
+            },
+            # Alternatively, you can specify configuration for just one
+            # of them, like this.
+        )
 
         # You can use axes.input_to_graph_point, abbreviated
         # to axes.i2gp, to find a particular point on a graph
         func = lambda \
             x: -960389 / 554268 + -28053989 / 7054320 * x + 634631 / 4594590 * x ** 2 + 9846547 / 26604864 * x ** 3 + -10202077 / 558702144 * x ** 4 + -5308757 / 931170240 * x ** 5 + 159751 / 399072960 * x ** 6
+        funcDx = lambda \
+            x: -28053989 / 7054320 + 634631 / 4594590 * 2 * x + 9846547 / 26604864 * 3 * x ** 2 + -10202077 / 558702144 * 4 * x ** 3 + -5308757 / 931170240 * 5 * x ** 4 + 159751 / 399072960 * 6 * x ** 5
+        func2 = lambda x: 2 * x ** 3 + x ** 4
+        funcNP = lambda x: np.array([x * self.w / (self.xR * 2), func(x) * self.h / (self.yR * 2), 0])
+        funcDxNP = lambda x, y: np.array([(x + y) * self.w / (self.xR * 2),
+                                          func(x) * self.h / (self.yR * 2) + y * funcDx(x) * self.h / (self.yR * 2), 0])
         graph1 = axes.get_graph(
             func,
             # use_smoothing=False,
-            color=YELLOW,
+            color=WHITE,
         )
         self.play(ShowCreation(graph1))
         dot = Dot(color=RED)
-        dot.move_to([-1 * self.w / (self.xR * 2), func(-1) * self.h / (self.yR * 2), 0])
-        path = axes.get_graph(func, x_range=[-1, 1.983])
-        path2 = axes.get_graph(func, x_range=[-4, -5.665])
-        path2.reverse_points()
+        dot.move_to(funcNP(-1))
+        path0 = axes.get_graph(func, x_range=[-1, 1.983])
+        path1 = axes.get_graph(func, x_range=[-1, 0.5])
+        path2 = axes.get_graph(func, x_range=[0.5, 1.5])
+        path3 = axes.get_graph(func, x_range=[1.5, 1.75])
+        path4 = axes.get_graph(func, x_range=[1.75, 1.983])
+        # path2 = axes.get_graph(func, x_range=[-4, -5.665])
+        # path2.reverse_points()
+        # path3 = axes.get_graph(func2, x_range=[0, 1.3])
+        # path3.reverse_points()
+
+        gradArrow1 = Arrow(funcNP(-1), funcDxNP(-1, -3), color=RED)
+        decArrow1 = Arrow(funcNP(-1), funcDxNP(-1, 3), color=RED)
+        decArrow2 = Arrow(funcNP(0.5), funcDxNP(0.5, 3), color=RED)
+        decArrow3 = Arrow(funcNP(1.5), funcDxNP(1.5, 3), color=RED)
+        decArrow4 = Arrow(funcNP(1.75), funcDxNP(1.75, 3), color=RED)
+        circle = Circle(arc_center=funcNP(1.983), radius=0.5, color=RED)
+
+        self.wait(5)
         self.play(FadeIn(dot, scale=0.5))
-        self.wait()
-        self.play(MoveAlongPath(dot, path), run_time=1)
-        self.wait(2)
-        dot.move_to([-4 * self.w / (self.xR * 2), func(-4) * self.h / (self.yR * 2), 0])
-        self.wait()
+        self.wait(5)
+        self.play(MoveAlongPath(dot, path0), run_time=1)
+        # self.play(ShowCreation(circle))
+        self.wait(5)
+        # self.play(FadeOut(circle))
+        dot.move_to(funcNP(-1))
+        self.wait(5)
+        self.play(ShowCreation(gradArrow1))
+        self.wait(5)
+        self.play(Transform(gradArrow1, decArrow1))
+        self.wait(5)
+        self.play(FadeOut(gradArrow1))
+        self.wait(5)
+        self.play(MoveAlongPath(dot, path1), run_time=1)
+        self.wait(1)
+        self.play(ShowCreation(decArrow2))
+        self.play(FadeOut(decArrow2))
         self.play(MoveAlongPath(dot, path2), run_time=1)
+        self.wait(1)
+        self.play(ShowCreation(decArrow3))
+        self.play(FadeOut(decArrow3))
+        self.play(MoveAlongPath(dot, path3), run_time=1)
+        self.wait(1)
+        self.play(ShowCreation(decArrow4))
+        self.play(FadeOut(decArrow4))
+        self.play(MoveAlongPath(dot, path4), run_time=1)
+        self.wait(10)
+        # dot.move_to(np.array([-4 * self.w / (self.xR * 2), func(-4) * self.h / (self.yR * 2), 0]))
+        # self.wait()
+        # self.play(MoveAlongPath(dot, path2), run_time=1)
+        # self.wait(2)
+        # self.play(FadeOut(dot))
+
+        # graph2 = axes2.get_graph(
+        #     func2,
+        #     # use_smoothing=False,
+        #     color=WHITE,
+        # )
+        # self.play(Transform(graph1, graph2))
+        # dot.move_to([1.3 * self.w / 5, func2(1.3) * self.h / 6, 0])
+        # self.play(FadeIn(dot))
+        # self.wait()
+        # self.play(MoveAlongPath(dot, path3), run_time=1)
+        # self.wait(2)
+
+
+class Text(Scene):
+    def construct(self):
+        text1 = TexText("Gradient")
+        text2 = TexText("Accent")
+        text3 = TexText("Descent")
+        text4 = TexText("Gradient Descent")
+        text1.to_edge(TOP)
+        text2.to_edge(BOTTOM)
+        text3.to_edge(BOTTOM)
+        self.play(Write(text1))
+        self.wait(5)
+        self.play(Write(text2))
+        self.wait(5)
+        self.play(Transform(text2, text3))
+        self.wait(5)
+        textGroup = Group(text1, text2)
+        self.play(Transform(textGroup, text4))
+        self.wait(10)
