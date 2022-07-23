@@ -287,6 +287,7 @@ class Graph(Scene):
         decArrow2 = Arrow(funcNP(0.5), funcDxNP(0.5, 3), color=RED)
         decArrow3 = Arrow(funcNP(1.5), funcDxNP(1.5, 3), color=RED)
         decArrow4 = Arrow(funcNP(1.75), funcDxNP(1.75, 3), color=RED)
+        decArrow5 = Arrow(funcNP(1.983), funcDxNP(1.983, 3), color=RED)
         circle = Circle(arc_center=funcNP(1.983), radius=0.5, color=RED)
 
         self.wait(5)
@@ -317,6 +318,9 @@ class Graph(Scene):
         self.play(ShowCreation(decArrow4))
         self.play(FadeOut(decArrow4))
         self.play(MoveAlongPath(dot, path4), run_time=1)
+        self.wait(1)
+        self.play(ShowCreation(decArrow5))
+        self.play(FadeOut(decArrow5))
         self.wait(10)
         # dot.move_to(np.array([-4 * self.w / (self.xR * 2), func(-4) * self.h / (self.yR * 2), 0]))
         # self.wait()
