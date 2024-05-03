@@ -49,7 +49,7 @@ skia-pathops==0.7.2
 stack-data==0.2.0
 svgelements==1.6.17
 sympy==1.10.1
-tqdm==4.64.0
+tqdm==4.66.3
 traitlets==5.2.2.post1
 validators==0.20.0
 wcwidth==0.2.5
