@@ -1,4 +1,4 @@
-# gradiant-decent
+# gradient-descent
 
 only has polynomial regressions right now
 might add more later
